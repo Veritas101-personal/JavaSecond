@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.green.springtest.dao.BoardDao">
+  <select id="getBoardList" resultType="kr.green.springtest.vo.BoardVo">
+    select * from board where isDel = 'N'
+    <if test="cri.type == 0">
+  		and (writer like concat('%',#{cri.search},'%')
+  		or title like concat('%',#{cri.search},'%')
+  		or content like concat('%',#{cri.search},'%'))
+  	</if>
+  	<if test="cri.type == 1">
+  		and writer like concat('%',#{cri.search},'%')
+  	</if>
+  	<if test="cri.type == 2">
+  		and title like concat('%',#{cri.search},'%')
+  	</if>
+  	<if test="cri.type == 3">
+  		and content like concat('%',#{cri.search},'%')
+  	</if>
+    order by num desc limit #{cri.startPage}, #{cri.perPageNum}
+  </select>
+  <select id="getNum" resultType="kr.green.springtest.vo.BoardVo">
+  	select * from board where num = ${num}
+  </select>
+  <update id="increaseNum">
+  	update board
+  		set
+  			watchNum = watchNum + 1
+  		where num = ${num}
+  </update>
+  <insert id="addArticle">
+  	insert into board (title,writer,content,file)
+  	values(#{board.title},#{board.writer},#{board.content},#{board.file})
+  </insert>
+  <update id="modifyContent">
+  	update board
+  		set
+  			title = #{board.title},
+  			content = #{board.content},
+  			file = #{board.file}
+  		where num = #{board.num}
+  </update>
+  <update id="deleteContent">
+  	update board
+  		set
+  			isDel = 'Y'
+  		where num = #{board.num}
+  </update>
+  <select id="getTotalCountByBoard" resultType="int">
+  select count(*)
+  	from board
+  	where isDel = 'N'
+  	<if test="cri.type == 0">
+  		and (writer like concat('%',#{cri.search},'%')
+  		or title like concat('%',#{cri.search},'%')
+  		or content like concat('%',#{cri.search},'%'))
+  	</if>
+  	<if test="cri.type == 1">
+  		and writer like concat('%',#{cri.search},'%')
+  	</if>
+  	<if test="cri.type == 2">
+  		and title like concat('%',#{cri.search},'%')
+  	</if>
+  	<if test="cri.type == 3">
+  		and content like concat('%',#{cri.search},'%')
+  	</if>
+  </select>
+  <select id="selectUp" resultType="int">
+  	select count(*) from up where boNum = #{boNum} and id = #{id};
+  </select>
+  <insert id="insertUp">
+  	insert into up(id,boNum) values(#{id},#{boNum});
+  </insert>
+  <update id="updateBoardByUp">
+  	update board
+  		set
+  			up = (select count(*) from up where boNum = #{boNum})
+  		where num = #{num};
+  </update>
+</mapper>
